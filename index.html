@@ -1,0 +1,235 @@
+<!-- In this assignment, you'll create a train schedule application that incorporates localStorage to host arrival and departure data. Your app will retrieve and manipulate this information with Moment.js. This website will provide up-to-date information about various trains, namely their arrival times and how many minutes remain until they arrive at their station. There is a Momentsjs example under the file 04-Momentjs in section 7.3.
+
+In case of any confusion; once you enter your train name, destination, frequency , and first train time. That information will be stored in your local storage. That data will be displayed on your table and Momentjs will just update the "minutes away" column and the "next arrival time" column, in real time.
+
+Make sure that your app suits this basic spec:
+
+When adding trains, administrators should be able to submit the following:
+
+Train Name
+Destination
+First Train Time in military time
+Frequency in minutes
+Code this app to calculate when the next train will arrive; this should be relative to the current time.
+
+Users from many different machines must be able to view same train times. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="assets/css/reset.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+	<link rel="stylesheet" href="assets/css/main.css">
+    <title>Train Time App</title>
+
+</head>
+
+<body>
+<div class="container">
+    <div class="jumbotron" style="background-color: black ; color: white;">
+        <h1 class="text-center"><strong>Don't go off the rails! <br>It's TrainTime</strong></h1>
+        <h2 class="text-center"><weak>ALL ABOARD!</weak></h2>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+        <br><br><br>
+            <div class="panel panel-primary">
+                <div class="panel-heading" style="background-color: orange ; color: white;">
+                    <h3 class="panel-title"><strong>Current Train Schedule</strong></h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table">
+                        <head>
+                            <tr>
+                                <th>Appointment Name</th><br>
+                                <th>Destination</th>
+                                <th>Frequency (minutes)</th>
+                                <th>Upcoming Arrival Time</th>
+                                <th>Train's Minutes Away</th>
+                            </tr>
+                        </head>
+                        <body id="table">
+
+                        </body>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading" style="background-color: green; color: white;">
+                    <h3 class="panel-title"><strong>Add Train</strong></h3>
+                </div>
+                <div class="panel-body">
+                    <form role="form">
+                    <div class="form-group">
+                        <label for="trainName">Name</label>
+                        <input type="text" class="form-control" id="trainName">
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destination</label>
+                        <input type="text" class="form-control" id="destinationName">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstTrain">First Train Time (hh:mm - <strong>military</strong>)</label>
+                        <input type="text" class="form-control" id="firstTrain">
+                    </div>
+                    <div class="form-group">
+                        <label for="frequency">Frequency (min)</label>
+                        <input type="text" class="form-control" id="frequency">
+                    </div>
+
+                    	<button type="submit" class="btn btn-warning" id="submitButton">Add Train</button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.3.js" integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script> <!-- Momentjs  -->
+<script>
+$(document).ready(function(){
+
+    // retrieving the userTrainCount from local storage... adding previously stored local data
+    var userTrainCount = localStorage.getItem('currentUserCount');
+
+    //go through the local storage and add the stored train's information -- LOOP
+    for (i = 0; i < userTrainCount; i++) {
+    	var getTrainInfo = localStorage.getItem('trainNumber-' + i);
+    	$('#table').append(getTrainInfo);
+    }
+
+    //on click function for submit button
+$('#submitButton').on('click', function(){
+
+    //creating empty array to store train information
+    var infoArray =[];
+
+    //taking the values from the inputs on the HTML form for new trains and storing as variables
+    var trainName = $('#trainName').val().trim();
+    var destination = $('#destinationName').val().trim();
+    var firstTrain = $('#firstTrain').val().trim();
+    var frequency = $('#frequency').val().trim();
+    var upcomingArrivals;
+    var minutesAway;
+
+    //taking the firstTrain variable storing as momentjs variable
+    var convertedTime = moment(firstTrain, 'HH:mm');
+    
+    //difference in minutes between the first train time and current time
+    var timeDifference = moment(convertedTime).diff(moment(), 'minutes');
+
+    //taking the absolute value of the time difference which will be used later
+    var absoluteTimeDifference = Math.abs(timeDifference);
+
+
+    if (timeDifference >= 0) {
+    // upcomingArrivals as the time inputted by the user
+
+        upcomingArrivals = moment(convertedTime).format('HH:mm A');
+        minutesAway = timeDifference;
+
+    } else {
+        var numberOfMultiples = Math.ceil(absoluteTimeDifference/frequency);
+
+        convertedTime.add(frequency*numberOfMultiples, 'minutes');
+        upcomingArrivals = moment(convertedTime).format('HH:mm A');
+
+
+        timeDifference = moment(convertedTime).diff( moment(), 'minutes', true);
+        minutesAway = Math.ceil(timeDifference);
+        
+    }
+    
+    //pushing all of the information that will be displayed in the <td> tags into our array
+    infoArray.push(trainName);
+    infoArray.push(destination);
+    infoArray.push(frequency);
+    infoArray.push(upcomingArrivals);
+    infoArray.push(minutesAway);
+
+    //dynamically creating a new table row with JQuery and giving it an id
+    var trainRow = $('<tr>');
+    trainRow.attr('id', 'item-' + userTrainCount);
+
+    //using a for loop and JQuery to create a new <td> item for every item in our infoArray and appending it to our table row
+    for (i = 0; i < infoArray.length; i++) {
+        trainIT = $('<td>');
+        trainIT.text(infoArray[a]);
+        trainRow.append(trainIT);
+    }
+
+    //appending the table row to the table body
+    $('#table').append(trainRow);
+
+    //storing the entire HTML of our created table row into local storage
+    var currentTrain = trainRow.prop('outerHTML');
+    localStorage.setItem('trainNumber-' + userTrainCount, currentTrain);
+
+    //increasing the userTrainCount and then storing that to their local storage
+    userTrainCount++;
+    localStorage.setItem('currentUserCount', userTrainCount);
+
+    //empty the form boxes
+    $('#train, #destination, #firstTrain, #frequency').val('');
+
+    // no refresh
+    return false;
+
+});
+
+    //updates arrival and shows minutes away for stored trains (upon refresh). Once the current time passes the upcomingArrivals, the train schedule needs to updated again
+    for (a = 0; a < userTrainCount; a++) {
+
+    	//target the table rows
+        var RowTds = $('table').children().eq(1).children('tr').eq(j).children('td');
+        
+        //grabbing the frequency and upcomingArrivals and storing as frequencyOrigin and timeOrigin
+        var frequencyOrigin = RowTds.eq(1).prop('innerHTML');
+        var timeOrigin = RowTds.eq(2).prop('innerHTML');
+
+        //taking the timeOrigin variable given by user and storing as momentjs variable
+        timeOrigin = moment(timeOrigin, 'HH:mm'); 
+
+        //calculating the newTimeDifference variable from current time and timeOrigin variable
+        var newTimeDifference = moment(timeOrigin).diff( moment(), 'minutes');
+        console.log('newTimeDifference: ' + newTimeDifference);
+
+        //taking the absolute value of the time difference which will be used later
+        var newAbsoluteTimeDifference = Math.abs(newTimeDifference);
+
+    	if (newTimeDifference >= 0) {
+    		var newminutesAway = newTimeDifference;
+    		RowTds.eq(3).text(Math.ceil(newminutesAway)); //function returns the smallest integer greater than or equal to a given number.
+
+    	} else {
+    		var newNumberOfMultiples = Math.ceil(newAbsoluteTimeDifference / frequencyOrigin);
+
+    		timeOrigin.add(frequencyOrigin*newNumberOfMultiples, 'minutes');
+    		var newupcomingArrivals = moment(timeOrigin).format('HH:mm A'); //moment: Parse, validate, manipulate, and display dates in JavaScript.
+
+    		//recalculate the newTimeDifference and then setting the new minutesAway
+    		newTimeDifference = moment(timeOrigin).diff( moment(), 'minutes', true);
+    		var newminutesAway = newTimeDifference;
+
+    		//add the newupcomingArrivals and newminutesAway to the table row to display the updated schedule
+    	    RowTds.eq(3).text(newupcomingArrivals);
+    	    RowTds.eq(4).text(Math.ceil(newminutesAway));
+    	}
+    }
+
+    //userTrainCount stored previously. Zero, in case this is their first time -- IF
+    if (userTrainCount === null) {
+    userTrainCount = 0;
+    } 
+});
+</script>
+
+</body>
+</html>
