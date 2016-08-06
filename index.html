@@ -122,30 +122,6 @@ $('#submitButton').on('click', function(){
     //taking the firstTrain variable storing as momentjs variable
     var convertedTime = moment(firstTrain, 'HH:mm');
     
-    //difference in minutes between the first train time and current time
-    var timeDifference = moment(convertedTime).diff(moment(), 'minutes');
-
-    //taking the absolute value of the time difference which will be used later
-    var absoluteTimeDifference = Math.abs(timeDifference);
-
-
-    if (timeDifference >= 0) {
-    // upcomingArrivals as the time inputted by the user
-
-        upcomingArrivals = moment(convertedTime).format('HH:mm A');
-        minutesAway = timeDifference;
-
-    } else {
-        var numberOfMultiples = Math.ceil(absoluteTimeDifference/frequency);
-
-        convertedTime.add(frequency*numberOfMultiples, 'minutes');
-        upcomingArrivals = moment(convertedTime).format('HH:mm A');
-
-
-        timeDifference = moment(convertedTime).diff( moment(), 'minutes', true);
-        minutesAway = Math.ceil(timeDifference);
-        
-    }
     
     infoArray.push(trainName);
     infoArray.push(destination);
@@ -200,14 +176,14 @@ y
         console.log('newTimeDifference: ' + newTimeDifference);
 
         //taking the absolute value of the time difference which will be used later
-        var newAbsoluteTimeDifference = Math.abs(newTimeDifference);
+        var newtimeDifference2 = Math.abs(newTimeDifference);
 
     	if (newTimeDifference >= 0) {
     		var newminutesAway = newTimeDifference;
     		RowTds.eq(3).text(Math.ceil(newminutesAway)); //function returns the smallest integer greater than or equal to a given number.
 
     	} else {
-    		var newNumberOfMultiples = Math.ceil(newAbsoluteTimeDifference / frequencyOrigin);
+    		var newNumberOfMultiples = Math.ceil(newtimeDifference2 / frequencyOrigin);
 
     		timeOrigin.add(frequencyOrigin*newNumberOfMultiples, 'minutes');
     		var newupcomingArrivals = moment(timeOrigin).format('HH:mm A'); //moment: Parse, validate, manipulate, and display dates in JavaScript.
