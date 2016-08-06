@@ -147,28 +147,26 @@ $('#submitButton').on('click', function(){
         
     }
     
-    //pushing all of the information that will be displayed in the <td> tags into our array
     infoArray.push(trainName);
     infoArray.push(destination);
     infoArray.push(frequency);
     infoArray.push(upcomingArrivals);
     infoArray.push(minutesAway);
 
-    //dynamically creating a new table row with JQuery and giving it an id
     var trainRow = $('<tr>');
     trainRow.attr('id', 'item-' + userTrainCount);
 
-    //using a for loop and JQuery to create a new <td> item for every item in our infoArray and appending it to our table row
+
     for (i = 0; i < infoArray.length; i++) {
         trainIT = $('<td>');
         trainIT.text(infoArray[a]);
         trainRow.append(trainIT);
     }
 
-    //appending the table row to the table body
+y
     $('#table').append(trainRow);
 
-    //storing the entire HTML of our created table row into local storage
+    //storing local storage
     var currentTrain = trainRow.prop('outerHTML');
     localStorage.setItem('trainNumber-' + userTrainCount, currentTrain);
 
